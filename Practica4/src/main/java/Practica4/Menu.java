@@ -1,19 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Practica4;
 
 import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
  * Clase menú, no modela ningún tipo de dato abstracto en específico. Contiene un método para generar un menú.
  * @author Nuñez Quintana, Luis Axel
  * @author Zárate García, Zuriel
- * @author Rosales López, Luis André
  */
-
 public class Menu{
 
     /**
@@ -21,7 +16,7 @@ public class Menu{
      * @param opciones: Un string que indica las opciones para acceder a las funciones del programa. (incluyendo "salir").
      * @return opcion: Un entero que almacena la opción elegida por el usuario.
      */
-    public static int menu (String[] opciones) throws IOException {
+    public static int menu (String[] opciones) throws IOException, InputMismatchException {
             
             Scanner entrada = new Scanner(System.in);
             int opcion = 0;

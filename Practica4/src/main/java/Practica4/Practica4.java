@@ -1,17 +1,18 @@
 package Practica4;
 import java.util.Scanner;
 import java.io.IOException;
+import java.util.InputMismatchException;
 
 /**
- *
+ * Clase principal del programa, no modela ningún tipo de dato abstracto en específico. Es el medio de interacción con el usuario.
  * @author Nuñez Quintana, Luis Axel
  * @author Zárate García, Zuriel
  */
 public class Practica4 {
 
     /**
-     *
-     * @param args
+     * Método principal del programa, permite la comunicación con el usuario.
+     * @param args parámetros enviados al programa.
      */
     public static void main(String[] args) {
         SistemaOperativo SO = SistemaOperativo.getSistemaOperativo();
@@ -38,13 +39,16 @@ public class Practica4 {
         };
         
         int eleccion = 0;
-        while(eleccion != 8){
+        boolean ejecucion = true;
+        while(ejecucion){
             switch(eleccion){
                 case 0:
                     try{
                         eleccion = Menu.menu(opciones);
                     }catch(IOException e){
                         System.out.println("Algo salio mal");
+                    }catch(InputMismatchException e){
+                        System.out.println("ingresaste un valor invalido, regresando al menu principal...");
                     }
                     break;
                 
@@ -52,7 +56,7 @@ public class Practica4 {
                     System.out.print("Ingresa el nombre del proceso: ");
                     Scanner nombreP = new Scanner(System.in);
                     String nombre = nombreP.nextLine();
-                    System.out.print("\n Elige el tama\u00f1o de tu proceso: ");
+                    System.out.print("\nElige el tama\u00f1o de tu proceso: ");
                     String[] tamanios = {"64","128","256","512","Cancelar"};
                     
                     int opcase1 = 0;
@@ -66,6 +70,8 @@ public class Practica4 {
                                     opcase1 = Menu.menu(tamanios);
                                 }catch(IOException e){
                                     System.out.println("Algo salio mal");
+                                }catch(InputMismatchException e){
+                                    System.out.println("Ingresaste un valor invalido, vuelve a intentar");
                                 }
                                 break;
                                 
@@ -156,9 +162,10 @@ public class Practica4 {
                     break;
                     
                 case 8:
-                    System.out.println("Saliendo...");
+                    System.out.println("Procesos preparados y en ejecucion: ");
                     SO.salirSistema();
-                    eleccion=0;
+                    System.out.println("Saliendo...");
+                    ejecucion = false;
                     break;
             }
 

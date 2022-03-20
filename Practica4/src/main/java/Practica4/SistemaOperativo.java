@@ -27,7 +27,7 @@ import java.util.Queue;
  */
 public class SistemaOperativo {
 
-    static SistemaOperativo sistemaOperativo;
+    private static SistemaOperativo sistemaOperativo;
     private String nombre;
     private Queue<Proceso> cola_procesos;
     private LinkedList<Proceso> procesos_finalizados;
@@ -283,6 +283,19 @@ public class SistemaOperativo {
      */
     public void salirSistema() {
         verProcesos();
+        for(Proceso p : cola_procesos){
+            p = null;
+        }
+        for(Proceso p : procesos_eliminados){
+            p = null;
+        }
+        for(Proceso p : procesos_finalizados){
+            p = null;
+        }
+        for(DireccionMemoria m : memoria){
+            m = null;
+        }
+        sistemaOperativo = null;
     }
 
 }
