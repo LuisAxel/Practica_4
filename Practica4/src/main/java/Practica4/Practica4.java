@@ -6,9 +6,13 @@ package Practica4;
  */
 public class Practica4 {
 
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         SistemaOperativo SO = SistemaOperativo.getSistemaOperativo();
-        
+
         System.out.println("############## 0 Procesos ##############");
         //Operaciones al tener 0 procesos
         System.out.println("############## ESTADO ##############");
@@ -25,14 +29,13 @@ public class Practica4 {
         SO.siguienteProceso();
         System.out.println("############## SALIR ##############");
         SO.salirSistema();
-        
-        
+
         System.out.println("############################");
         System.out.println("############## 1 Proceso ##############");
         //Operaciones al tener 1 proceso
         System.out.println("############## CREA ##############");
         SO.creaProceso("Word.exe", 512);
-        
+
         System.out.println("############## ESTADO ##############");
         SO.verEstado();
         System.out.println("############## COLA ##############");
@@ -45,7 +48,7 @@ public class Practica4 {
         SO.siguienteProceso();
         System.out.println("############## SALIR ##############");
         SO.salirSistema();
-        
+
         System.out.println("############## ESTADO ##############");
         SO.verEstado();
         System.out.println("############## ACTUAL ##############");
@@ -56,7 +59,7 @@ public class Practica4 {
         SO.verEstado();
         System.out.println("############## ACTUAL ##############");
         SO.verProcesoActual();
-        
+
         System.out.println("############################");
         System.out.println("############## Muchos Procesos ##############");
         //Operaciones al tener max procesos
@@ -70,7 +73,7 @@ public class Practica4 {
         SO.creaProceso("Word5.exe", 512);
         System.out.println("############## CREA ##############");
         SO.creaProceso("Word6.exe", 512);
-        
+
         System.out.println("############## ESTADO ##############");
         SO.verEstado();
         System.out.println("############## COLA ##############");
@@ -85,7 +88,7 @@ public class Practica4 {
         SO.siguienteProceso();
         System.out.println("############## SALIR ##############");
         SO.salirSistema();
-        
+
         System.out.println("############## ESTADO ##############");
         SO.verEstado();
         System.out.println("############## ACTUAL ##############");
@@ -96,13 +99,13 @@ public class Practica4 {
         SO.verEstado();
         System.out.println("############## ACTUAL ##############");
         SO.verProcesoActual();
-        
+
         System.out.println("############## EJECUTA ##############");
-        
-        for(int i = 0; i < 20; i ++){
+
+        for (int i = 0; i < 20; i++) {
             SO.ejecutaProceso();
         }
-        
+
         System.out.println("############## ESTADO ##############");
         SO.verEstado();
         System.out.println("############## ACTUAL ##############");
