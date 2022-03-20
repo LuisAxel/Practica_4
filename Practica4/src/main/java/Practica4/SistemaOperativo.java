@@ -4,6 +4,21 @@ package Practica4;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * Clase SistemaOperativo, modela al objeto sistema operativo. 
+ * 
+ * Cuenta con los atributos: 
+ * 
+ * |> sistemaOperativo: Instancia única de sistema operativo.
+ * |> nombre: Cadena que indica el nombre del sistema operativo, su valor es "AZ SO".
+ * |> cola_procesos: Cola que almacena los procesos "preparados" y el proceso en "ejecución".
+ * |> procesos_finalizados: Lista ligada que almacena los procesos que han concluido todas sus instrucciones.
+ * |> procesos_eliminados: Lista ligada que almacena los procesos que han finalizado sin realizar todas sus instrucciones.
+ * |> memoria: Arreglo de tamaño 2048 direcciones de memoria con las que cuenta el sistema operativo.
+ * 
+ * @author Núñez Quintana, Luis Axel
+ * @author Zárate García, Zuriel
+ */
 public class SistemaOperativo {
     static SistemaOperativo sistemaOperativo;
     private String nombre;
@@ -12,11 +27,18 @@ public class SistemaOperativo {
     private LinkedList<Proceso> procesos_eliminados;
     private DireccionMemoria[] memoria;
     
-    
+    /**
+     * Método constructor vacío privado, únicamente se puede tener una instancia de sistema operativo.
+     */
     private SistemaOperativo(){
     }
     
-    private SistemaOperativo(String nombre){
+    /**
+     * Método constructor privado que es utilizado para crear la única instancia de sistema operativo, inicializa el arreglo de direcciones de memoria, la cola de procesos y las listas de procesos finalizados y eliminados.
+     * @param n Nombre del sistema operativo, su valor es "AZ SO".
+     */
+    private SistemaOperativo(String n){
+        nombre = n;
         memoria = new DireccionMemoria[2048];
         cola_procesos = new LinkedList<>();
         procesos_finalizados = new LinkedList<>();
@@ -24,6 +46,10 @@ public class SistemaOperativo {
         inicializaMemoria();
     }
     
+    /**
+     * Método que devuelve o crea y devuelve a la única instancia del sistema operativo
+     * @return sistemaOperativo Instancia del sistema operativo "AZ SO", cuenta con 2048 localidades de memoria.
+     */
     public static SistemaOperativo getSistemaOperativo(){
         if(sistemaOperativo == null){
             sistemaOperativo = new SistemaOperativo("AZ SO");
@@ -31,40 +57,69 @@ public class SistemaOperativo {
         return sistemaOperativo;
     }
     
-    
+    /**
+     * Método que inicializa todas las localidades de memoria del sistema operativo.
+     */
     private void inicializaMemoria(){
         for(int i = 0; i < 2048; i ++){
             memoria[i] = new DireccionMemoria(i);
         }
     }
     
+    /**
+     * Método que imprime el estado de todas las localidades de memoria del sistema operativo.
+     */
     private void verMemoria(){
         for(int i = 0; i < 2048; i ++){
             memoria[i].imprimeMemoria();
         }
     }
     
+    /**
+     * Método que imprime los nombres de los procesos finalizados. Si no han finalizado procesos, notifica al usuario.
+     */
     private void verProcesosFinalizados(){
-        System.out.println("\tProcesos finalizados");
-        for(Proceso i : procesos_finalizados){
-            System.out.println("\t" + i.getNombre());
+        if(procesos_finalizados.isEmpty()){
+            System.out.println("\tNo hay procesos finalizados");
+        }else{
+            System.out.println("\tProcesos finalizados");
+            for(Proceso i : procesos_finalizados){
+                System.out.println("\t" + i.getNombre());
+            } 
         }
     }
     
+    /**
+     * Método que imprime los nombres de los procesos eliminados. Si no se han eliminado procesos, notifica al usuario.
+     */
     private void verProcesosEliminados(){
-        System.out.println("\tProcesos eliminados");
-        for(Proceso i : procesos_eliminados){
-            System.out.println("\t" + i.getNombre());
+        if(procesos_eliminados.isEmpty()){
+            System.out.println("\tNo hay procesos eliminados");
+        }else{
+            System.out.println("\tProcesos eliminados");
+            for(Proceso i : procesos_eliminados){
+                System.out.println("\t" + i.getNombre());
+            }
         }
     }
     
+    /**
+     * Método que imprime los atributos de los procesos "preparados" y el proceso "en ejecución". Si no hay procesos, notifica al usuario,
+     */
     public void verProcesos(){
-        System.out.println("\tProcesos listos");
-        for(Proceso i : cola_procesos){
-            i.imprimeProceso();
+        if(cola_procesos.isEmpty()){
+            System.out.println("\tNo hay procesos preparados o en ejecucion");
+        }else{   
+            System.out.println("\tProcesos listos");
+            for(Proceso i : cola_procesos){
+                i.imprimeProceso();
+            }
         }
     }
     
+    /**
+     * Método que imprime los atributos del proceso "en ejecución". Si no hay procesos, notifica al usuario,
+     */
     public void verProcesoActual(){
         if(cola_procesos.isEmpty()){
             System.out.println("\tNo hay procesos preparados");
@@ -73,6 +128,9 @@ public class SistemaOperativo {
         }
     }
     
+    /**
+     * Método que ejecuta 5 instrucciones del proceso "en ejecución", vuelve a ingresarlo a la cola de procesos si tiene instrucciones por realizar, cambia los estados del proceso actual a "preparado" y al siguiente a "en ejecución". Si concluye sus instrucciones cambia su estado a "terminado" y lo agrega a la lista de procesos finalizados. Si no hay procesos, notifica al usuario.
+     */
     public void ejecutaProceso(){
         if(cola_procesos.isEmpty()){
             System.out.println("\tNo hay procesos preparados");
@@ -83,6 +141,7 @@ public class SistemaOperativo {
                 cola_procesos.add(actual);
             }else{
                 liberaProceso(actual);
+                actual.eliminaProceso();
                 procesos_finalizados.add(actual);
             }
             if(cola_procesos.peek() != null){
@@ -91,6 +150,9 @@ public class SistemaOperativo {
         }
     }
     
+    /**
+     * Método que cambia al siguiente proceso en la cola sin realizar instrucciones del actual. Cambia los estados del proceso actual a "preparado" y al siguiente a "en ejecución". Si no hay procesos, notifica al usuario.
+     */
     public void siguienteProceso(){
         if(cola_procesos.isEmpty()){
             System.out.println("\tNo hay procesos preparados");
@@ -102,12 +164,16 @@ public class SistemaOperativo {
         }
     }
     
+    /**
+     * Método que elimina al proceso actual y libera las direcciones de memoria que utilizaba. Cambia los estados del proceso actual a "finalizado" y al siguiente a "en ejecución". Si no hay procesos, notifica al usuario.
+     */
     public void eliminaProceso(){
         if(cola_procesos.isEmpty()){
             System.out.println("\tNo hay procesos preparados");
         }else{
             Proceso actual = cola_procesos.remove();
             liberaProceso(actual);
+            actual.eliminaProceso();
             procesos_eliminados.add(actual);
             
             if(cola_procesos.peek() != null){
@@ -116,12 +182,20 @@ public class SistemaOperativo {
         }
     }
     
+    /**
+     * Método que libera las direcciones de memoria que utilizaba el proceso a eliminar.
+     * @param p Proceso a eliminar.
+     */
     private void liberaProceso(Proceso p){
         for(int i = p.getDirecciones()[0]; i < p.getDirecciones()[0] + p.getDirecciones()[1]; i ++){
             memoria[i].liberaMemoria();
         }
     }
     
+    /**
+     * Método que muestra el estado del sistema operativo. Muestra las direcciones de memoria, el número de procesos "preparados" y "en ejecución", el nombre de los procesos finalizados y eliminados.
+     * @param p Proceso a eliminar.
+     */
     public void verEstado(){
         System.out.println("\tNumero de procesos listos: " + cola_procesos.size());
         verProcesosFinalizados();
@@ -129,6 +203,12 @@ public class SistemaOperativo {
         verMemoria();
     }
     
+    /**
+     * Método que crea un proceso y lo agrega a la cola de procesos si hay espacio disponible en la memoria.
+     * @param nombre Nombre del proceso a crear.
+     * @param tamano Número de direcciones de memoria que utilizará el proceso.
+     * @return valorBooleano Indica si fue posible la creación del proceso, su valor es falso si no hay localidades de memoria contiguas disponibles para el proceso.
+     */
     public boolean creaProceso(String nombre, int tamano){
         int counter = 0;
         
@@ -160,6 +240,9 @@ public class SistemaOperativo {
         return false;
     }
     
+    /**
+     * Método que termina la ejecución del sistema operativo. Muestra la cola de procesos.
+     */
     public void salirSistema(){
         verProcesos();
     }
