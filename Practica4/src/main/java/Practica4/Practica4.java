@@ -33,8 +33,10 @@ public class Practica4 {
             "Ejecutar proceso actual",
             "Pasar al proceso siguiente",
             "Matar proceso actual",
-            "Ver estado actual del sistema",
+            "Ver estado de los procesos",
             "Imprimir cola de procesos",
+            "Ver estado de la memoria",
+            "Desfragmentar memoria",
             "Salir del programa"
         };
         
@@ -162,6 +164,16 @@ public class Practica4 {
                     break;
                     
                 case 8:
+                    SO.verMemoria();
+                    eleccion=0;
+                    break;  
+                
+                case 9:
+                    SO.desfragmentarMemoria();
+                    eleccion=0;
+                    break;
+                    
+                case 10:
                     System.out.println("Procesos preparados y en ejecucion: ");
                     SO.salirSistema();
                     System.out.println("Saliendo...");

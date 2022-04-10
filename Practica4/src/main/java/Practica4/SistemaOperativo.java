@@ -18,7 +18,9 @@ import java.util.Queue;
  * concluido todas sus instrucciones.</li>
  * <li> procesos_eliminados: Lista ligada que almacena los procesos que han
  * finalizado sin realizar todas sus instrucciones.</li>
- * <li> memoria: Arreglo de tamaño 2048 direcciones de memoria con las que cuenta
+ * <li> memoria: Arreglo de tamaño 1024 de direcciones de memoria con las que cuenta
+ * el sistema operativo.</li>
+ * <li> marcos: Arreglo de tamaño 64 de marcos con los que cuenta
  * el sistema operativo.</li>
  * </ul>
  * 
@@ -33,6 +35,7 @@ public class SistemaOperativo {
     private LinkedList<Proceso> procesos_finalizados;
     private LinkedList<Proceso> procesos_eliminados;
     private DireccionMemoria[] memoria;
+    private Proceso[] marcos;
 
     /**
      * Método constructor vacío privado, únicamente se puede tener una instancia
@@ -44,13 +47,14 @@ public class SistemaOperativo {
     /**
      * Método constructor privado que es utilizado para crear la única instancia
      * de sistema operativo, inicializa el arreglo de direcciones de memoria, la
-     * cola de procesos y las listas de procesos finalizados y eliminados.
+     * cola de procesos, el arreglo de marcos, las listas de procesos finalizados y eliminados.
      *
      * @param n Nombre del sistema operativo, su valor es "AZ SO".
      */
     private SistemaOperativo(String n) {
         nombre = n;
-        memoria = new DireccionMemoria[2048];
+        memoria = new DireccionMemoria[1024];
+        marcos = new Proceso[64];
         cola_procesos = new LinkedList<>();
         procesos_finalizados = new LinkedList<>();
         procesos_eliminados = new LinkedList<>();
@@ -76,19 +80,34 @@ public class SistemaOperativo {
      * operativo.
      */
     private void inicializaMemoria() {
-        for (int i = 0; i < 2048; i++) {
-            memoria[i] = new DireccionMemoria(i);
+        int contador = 0;
+        for (int i = 0; i < 1024; i++) {
+            if(i % 16 == 0){
+                marcos[contador++] = null; // El marco no está en uso
+            }
+            memoria[i] = new DireccionMemoria(i, contador);
         }
     }
 
     /**
-     * Método que imprime el estado de todas las localidades de memoria del
-     * sistema operativo.
+     * Método que imprime la lista ligada de localidades de memoria.
      */
-    private void verMemoria() {
-        for (int i = 0; i < 2048; i++) {
-            memoria[i].imprimeMemoria();
+    public void verMemoria() {
+        System.out.println("\tEstado de la Memoria: ");
+        int contador = 1;
+        String proceso = memoria[0].getProceso();
+        for(int i = 0; i < 63; i ++){
+            if(proceso.equals(memoria[16 * (i + 1)].getProceso())){
+                contador ++;
+            }else{
+                System.out.println("\t[ " + proceso + " | " + (((i + 1) * 16) - (contador * 16)) + " | " + (contador * 16) + " ]");
+                proceso = memoria[16 * (i + 1)].getProceso();
+                contador = 1;
+            }
         }
+        proceso = memoria[1023].getProceso();
+        System.out.println("\t[ " + proceso + " | " + ((1024) - (contador * 16)) + " | " + (contador * 16) + " ]");
+        
     }
 
     /**
@@ -214,26 +233,29 @@ public class SistemaOperativo {
 
     /**
      * Método que libera las direcciones de memoria que utilizaba el proceso a
-     * eliminar.
+     * eliminar. También actualiza el arreglo de marcos en uso.
      *
      * @param p Proceso a eliminar.
      */
     private void liberaProceso(Proceso p) {
-        for (int i = p.getDirecciones()[0]; i < p.getDirecciones()[0] + p.getDirecciones()[1]; i++) {
-            memoria[i].liberaMemoria();
+        for (int i : p.getMarcos()) {
+            marcos[i] = null;
+            for(int j = 0; j < 16; j ++){
+                memoria[(i * 16) + j].liberaMemoria();
+            }
         }
     }
 
     /**
-     * Método que muestra el estado del sistema operativo. Muestra las
-     * direcciones de memoria, el número de procesos "preparados" y "en
-     * ejecución", el nombre de los procesos finalizados y eliminados.
+     * Método que muestra el estado del sistema operativo. Muestra el número de 
+     * procesos "preparados" y "en ejecución", el nombre de los procesos 
+     * finalizados y eliminados.
      */
     public void verEstado() {
         System.out.println("\tNumero de procesos listos: " + cola_procesos.size());
         verProcesosFinalizados();
         verProcesosEliminados();
-        verMemoria();
+        //verMemoria();
     }
 
     /**
@@ -243,20 +265,24 @@ public class SistemaOperativo {
      * @param nombre Nombre del proceso a crear.
      * @param tamano Número de direcciones de memoria que utilizará el proceso.
      * @return valorBooleano Indica si fue posible la creación del proceso, su
-     * valor es falso si no hay localidades de memoria contiguas disponibles
+     * valor es falso si no hay localidades de memoria disponibles
      * para el proceso.
      */
     public boolean creaProceso(String nombre, int tamano) {
         int counter = 0;
-
-        for (int i = 0; i < 2048; i++) {
-            if (!memoria[i].getEstado()) {
-                counter++;
-                if (counter == tamano) {
-                    Proceso nuevo_proceso = new Proceso(nombre, i - tamano + 1, tamano);
-                    int dir_base = i - tamano + 1;
-                    for (int j = 0; j < tamano; j++) {
-                        memoria[j + dir_base].iniciaMemoria(nuevo_proceso.getNombre());
+        int marcos_necesarios = tamano / 16;
+        int marcos_proceso[] = new int[marcos_necesarios];
+        for (int i = 0; i < 64; i++) {
+            if (marcos[i] == null) {
+                marcos_proceso[counter++] = i;
+                if (counter == marcos_necesarios) {
+                    Proceso nuevo_proceso = new Proceso(nombre, marcos_proceso, tamano);
+                    
+                    for (int j : marcos_proceso) {
+                        marcos[j] = nuevo_proceso;
+                        for(int k = 0; k < 16; k ++){
+                            memoria[(j * 16) + k].iniciaMemoria(nuevo_proceso.getNombre());
+                        }
                     }
 
                     if (cola_procesos.isEmpty()) {
@@ -269,14 +295,66 @@ public class SistemaOperativo {
 
                     return true;
                 }
-            } else {
-                counter = 0;
-            }
+            } 
         }
 
         return false;
     }
 
+    /**
+     * Método que desfragmenta la memoria eliminando huecos entre procesos. 
+     * Actualiza las localidades de memoria y el arreglo de marcos en uso.
+     * Mostrará la lista ligada de localidades de memoria antes y después de 
+     * realizar la desfragmentación.
+     */
+    public void desfragmentarMemoria() {
+        
+        System.out.println("\tVieja Memoria: ");
+        verMemoria();
+        
+        int i = 0;
+        int j = 63;
+        
+        // Mientras no se cruzen 
+        while(i < j){
+            // Mientras no haya huecos avanza
+            while(marcos[i] != null){
+                i++;
+            }
+            
+            // Mientras haya huecos retrocede
+            while(marcos[j] == null){
+                j--;
+            }
+            
+            // Aún no se cruzan?
+            if(i < j){
+                // Intercambia hueco por proceso
+                Proceso swap = marcos[j];
+                
+                // Intercambia memoria
+                for(int k = 0; k < 16; k ++){
+                    memoria[k + (i * 16)].iniciaMemoria(swap.getNombre());
+                    memoria[k + (j * 16)].liberaMemoria();
+                }
+                
+                // Actualiza lista de páginas
+                swap.setMarco(i, j);
+                
+                // Actualiza estado de marco del SO
+                marcos[i] = swap;
+                marcos[j] = null;
+                        
+                // Avanza pointers
+                i ++;
+                j --;
+            }
+        }
+        System.out.println("\tNueva Memoria: ");
+        verMemoria();
+        
+    }
+    
     /**
      * Método que termina la ejecución del sistema operativo. Muestra la cola de
      * procesos.
@@ -295,6 +373,10 @@ public class SistemaOperativo {
         for(DireccionMemoria m : memoria){
             m = null;
         }
+        for(Proceso p: marcos){
+            p = null;
+        }
+        
         sistemaOperativo = null;
     }
 

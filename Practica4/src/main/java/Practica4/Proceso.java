@@ -12,8 +12,9 @@ import java.util.Random;
  * <li> id: Identificador único del proceso.
  * <li> instrucciones: Arreglo de tamaño 2, almacena las instrucciones totales y
  * ejecutadas del proceso.</li>
- * <li> direcciones_memoria: Arreglo de tamaño 2, almacena la dirección base y
- * límite del proceso.</li>
+ * <li> paginas: Número de páginas con las que cuenta el proceso. </li>
+ * <li> marcos: Arreglo que relaciona la página de posición i con el marco de 
+ * memoria (Tabla de páginas).</li>
  * <li> estado: Almacena el estado del proceso (Nuevo, En ejecución, Preparado o
  * Terminado).</li>
  * <li> num_procesos: Contador de total de procesos, es utilizada para asignar ids
@@ -27,25 +28,27 @@ public class Proceso {
     private String nombre;
     private int id;
     private int[] instrucciones; // 2 [totales, ejecutadas]
-    private int[] direcciones_memoria;// 2 [base, limite]
+    private int paginas; 
+    private int[] marcos; // posicion = pag, valor = marco 
     private String estado;
     private static int num_procesos;
 
     /**
      * Método constructor, inicializa los atributos nombre, id,
-     * direcciones_memoria, instrucciones y estado. Solo realiza asignación
+     *tabla de páginas, páginas, instrucciones y estado. Solo realiza asignación
      * directa a id y num_procesos, llama a los métodos setters.
      *
      * @param nombre Nombre del proceso.
-     * @param dir_base Dirección base del proceso.
-     * @param dir_limite Dirección límite del proceso.
+     * @param m Lista de marcos inciales del proceso.
+     * @param dir_limite Tamaño del proceso.
      */
-    public Proceso(String nombre, int dir_base, int dir_limite) {
+    public Proceso(String nombre, int[] m, int dir_limite) {
         id = ++num_procesos;
         setNombre(nombre);
-        direcciones_memoria = new int[2];
-        setDir(dir_base, dir_limite);
+        setPaginas(dir_limite);
         instrucciones = new int[2];
+        marcos = new int[paginas];
+        setMarcos(m);
         setInstrucciones();
         setEstado(0);
     }
@@ -58,16 +61,40 @@ public class Proceso {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+    
+    /**
+     * Método que inicializa el número de páginas que tendrá un proceso.
+     *
+     * @param dir_limite Entero que indica la el tamaño del proceso.
+     */
+    public void setPaginas(int dir_limite) {
+        this.paginas = dir_limite / 16;
+    }
 
     /**
-     * Método que inicializa y altera el arreglo direcciones_memoria.
+     * Método que inicializa la tabla de páginas de un proceso.
      *
-     * @param dir_base Entero que indica la dirección base del proceso.
-     * @param dir_limite Entero que indica la dirección límite del proceso.
+     * @param m Lista de marcos del proceso
      */
-    public void setDir(int dir_base, int dir_limite) {
-        this.direcciones_memoria[0] = dir_base;
-        this.direcciones_memoria[1] = dir_limite;
+    public void setMarcos(int[] m) {
+        for(int i = 0; i < paginas; i ++){
+            this.marcos[i] = m[i];
+        }
+    }
+    
+    /**
+     * Método que altera una relación entre página y marco.
+     *
+     * @param marco_viejo marco a ser reemplazado.
+     * @param marco_nuevo marco por el cual se reemplazará.
+     */
+    public void setMarco(int marco_viejo, int marco_nuevo) {
+        for(int i = 0; i < paginas; i ++){
+            if(this.marcos[i] == marco_viejo){
+                this.marcos[i] = marco_nuevo;
+                break;
+            }
+        }
     }
 
     /**
@@ -146,13 +173,13 @@ public class Proceso {
     }
 
     /**
-     * Método que devuelve al atributo direcciones_memoria.
+     * Método que devuelve la tabla de páginas de un proceso
      *
-     * @return direcciones_memoria Arreglo entero de tamaño 2 que indica: [0] :
-     * Dirección base del proceso y [1] : Dirección límite del proceso.
+     * @return marcos Arreglo entero de tamaño paginas que indica: posición :
+     * página del proceso y valor : marco asociado.
      */
-    public int[] getDirecciones() {
-        return direcciones_memoria;
+    public int[] getMarcos() {
+        return marcos;
     }
 
     /**
@@ -178,16 +205,15 @@ public class Proceso {
 
     /**
      * Método que simula la eliminación del proceso.
-     * Cambia el estado del proceso a Terminado y asigna como dirección base y
-     * límite el valor 0.
+     * Cambia el estado del proceso a Terminado y elimina el arreglo de marcos
      */
     public void eliminaProceso() {
         this.setEstado(3);
-        this.setDir(0, 0);
+        this.marcos = null;
     }
 
     /**
-     * Método que imprime los atributos del proceso.
+     * Método que imprime los atributos y tabla de páginas del proceso.
      */
     public void imprimeProceso() {
         System.out.println("\tNombre del Proceso: " + getNombre());
@@ -195,7 +221,9 @@ public class Proceso {
         System.out.println("\tEstado del Proceso: " + getEstado());
         System.out.println("\tInstrucciones totales del Proceso: " + getInstrucciones()[0]);
         System.out.println("\tInstrucciones ejecutadas del Proceso: " + getInstrucciones()[1]);
-        System.out.println("\tDireccion base del Proceso: " + getDirecciones()[0]);
-        System.out.println("\tDireccion limite del Proceso: " + getDirecciones()[1]);
+        System.out.println("\tMarcos: ");
+        for(int i = 0; i < paginas; i ++){
+             System.out.println("\tPagina " + i +": Marco " + marcos[i]);
+        }
     }
 }

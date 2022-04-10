@@ -11,25 +11,29 @@ package Practica4;
  * <li> proceso: Cadena que indica el nombre del proceso que utiliza la localidad.
  * Su valor es "-" si no se encuentra en uso.</li>
  * <li> estado: Booleano que indica si la localidad se encuentra en uso.</li>
+ * <li> marco: Entero que indica el marco a la que corresponde una dirección de 
+ * memoria.</li>
  * </ul>
  * @author Núñez Quintana, Luis Axel
  * @author Zárate García, Zuriel
  */
 public class DireccionMemoria {
 
-    private int localidad;
+    private final int localidad;
     private String proceso;
     private boolean estado;
+    private final int marco;
 
     /**
-     * Método constructor, inicializa los atributos localidad, proceso y estado.
-     * Solo realiza asignación directa a localidad, llama a los métodos setters.
+     * Método constructor, inicializa los atributos localidad, proceso, estado y marco. Solo realiza asignación directa a localidad y marco, llama a los métodos setters.
      * Una nueva dirección de memoria no tiene un proceso asignado.
      *
      * @param l Localidad correspondiente a la dirección de memoria.
+     * @param m Marco correspondiente a la dirección de memoria.
      */
-    public DireccionMemoria(int l) {
+    public DireccionMemoria(int l, int m) {
         localidad = l;
+        marco = m;
         liberaMemoria();
     }
 
@@ -83,6 +87,15 @@ public class DireccionMemoria {
         this.proceso = "-";
         this.estado = false;
     }
+    
+    /**
+     * Método que devuelve al atributo marco.
+     *
+     * @return marco al que pertenece la localidad de memoria
+     */
+    public int getMarco() {
+        return marco;
+    }
 
     /**
      * Método que imprime los atributos de la dirección de memoria, si no se
@@ -90,6 +103,7 @@ public class DireccionMemoria {
      */
     public void imprimeMemoria() {
         System.out.print("\tLocalidad: " + getLocalidad());
+        System.out.print("\tMarco: " + getMarco());
         if (getEstado()) {
             System.out.print("\tEstado: En uso");
             System.out.println("\tProceso: " + getProceso());
